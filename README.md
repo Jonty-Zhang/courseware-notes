@@ -4,8 +4,8 @@
 
 | skill | 调用 | 内容 |
 |---|---|---|
-| `lecture-with-examples` | `/lecture-with-examples` | 知识点 + 解题方法卡 + 每种方法 1～2 道关键例题（带题图） |
-| `lecture-no-examples` | `/lecture-no-examples` | 知识点 + 解题方法卡，不含例题，用语句写清做法和关键点 |
+| `review-f` | `/review-f` | 知识点 + 解题方法卡 + 每种方法 1～2 道关键例题（带题图） |
+| `review` | `/review` | 知识点 + 解题方法卡，不含例题，用语句写清做法和关键点 |
 
 两个版本的知识点都配有课件截图，首页都有标题和自动目录。两者共用 `shared/scripts` 和 `shared/references`（各 skill 目录里的 `scripts`、`references` 是指向 `shared/` 的符号链接）。
 
@@ -24,8 +24,8 @@
 
 ```bash
 git clone https://github.com/Jonty-Zhang/courseware-notes ~/.claude/skill-repos/courseware-notes
-ln -s ~/.claude/skill-repos/courseware-notes/lecture-with-examples ~/.claude/skills/lecture-with-examples
-ln -s ~/.claude/skill-repos/courseware-notes/lecture-no-examples ~/.claude/skills/lecture-no-examples
+ln -s ~/.claude/skill-repos/courseware-notes/review-f ~/.claude/skills/review-f
+ln -s ~/.claude/skill-repos/courseware-notes/review ~/.claude/skills/review
 brew install poppler pandoc        # 或用系统包管理器安装
 pip install -r ~/.claude/skill-repos/courseware-notes/requirements.txt
 ```
@@ -34,7 +34,7 @@ pip install -r ~/.claude/skill-repos/courseware-notes/requirements.txt
 
 ## 使用
 
-在 Claude Code 里把课件 PDF 放进工作目录，输入 `/lecture-with-examples` 或 `/lecture-no-examples`。也可以单独用脚本：
+在 Claude Code 里把课件 PDF 放进工作目录，输入 `/review-f` 或 `/review`。也可以单独用脚本：
 
 ```bash
 python3 shared/scripts/render_pages.py lecture.pdf --out work/ch1
