@@ -49,13 +49,21 @@ python3 scripts/render_pages.py "课件.pdf" --out work/ch1
 
 每种方法选 1～2 道最能体现"怎么想"的例题（取哪个研究对象、为什么对这一点取矩、临界状态怎么判断），每章一般 2～5 道。
 
+**能用图说明的地方就放图，比文字更直观。** 配图分两类：
+
+- **知识点配图**：概念示意、受力图、几何关系、分类对比，例如力的平移、力螺旋、各类约束的约束力画法、摩擦角。放在例题块外面，两个版本都有。每章一般 3～9 张，读清单时就标出"图 pNN"。
+- **例题配图**：题目的结构简图，放在例题块里面，只出现在含例题版。
+
+几张小图需要对照着看时（比如各类约束），用 `compose_figures.py` 拼成一张带标签的对比图。照片、动画截图、装饰图不放。
+
 截图：在拼图或单页图上读出图形区域，按页面宽高的比例写进裁剪清单，然后
 
 ```bash
 python3 scripts/crop_figure.py "课件.pdf" crops.txt --out work/figs
+python3 scripts/compose_figures.py work/figs/约束对比.jpg --cols 3 a.jpg:光滑面 b.jpg:圆柱铰链 …
 ```
 
-脚本按 220 dpi 重新渲染并裁剪，同时生成 `_review.png`。看一遍审查图，把带进标题文字、边框线或截掉标注的框调好再裁。
+脚本按 220 dpi 重新渲染并裁剪，默认存成 JPEG（课件背景常有纹理，PNG 会让 docx 体积大好几倍），同时生成 `_review.png`。看一遍审查图，把带进标题文字、边框线或截掉标注的框调好再裁。
 
 ### 5. 写 Markdown 源稿
 
@@ -66,14 +74,18 @@ python3 scripts/crop_figure.py "课件.pdf" crops.txt --out work/figs
 - 用完整的句子写清"在什么情况下、怎么做、要注意什么"，纯方法版的读者看不到例题，方法卡本身要能独立指导做题。
 - 每个知识点和方法末尾标课件页码 `〔章-p页〕`，方便回看原课件。
 - 重点用 `==…==` 标成浅蓝色，只标核心结论、关键条件，全文控制在 3%～8%，不超过 20%。
-- 不写全文大标题，不写"以下是整理的内容""根据要求"之类的过程性文字。
+- 源稿里不写全文标题（标题由构建参数加），也不写"以下是整理的内容""根据要求"之类的过程性文字。
 
 ### 6. 构建 Word
 
 ```bash
-python3 scripts/build_docx.py ch1.md ch2.md … 总表.md -o "XX_知识点与解题方法（含例题版）.docx" --toc
-python3 scripts/build_docx.py ch1.md ch2.md … 总表.md -o "XX_知识点与解题方法（纯方法版）.docx" --toc --drop-examples
+python3 scripts/build_docx.py ch1.md ch2.md … 总表.md -o "XX_知识点与解题方法（含例题版）.docx" \
+    --toc --title "课程名 知识点与解题方法" --subtitle "（含例题版）"
+python3 scripts/build_docx.py ch1.md ch2.md … 总表.md -o "XX_知识点与解题方法（纯方法版）.docx" \
+    --toc --title "课程名 知识点与解题方法" --subtitle "（纯方法版）" --drop-examples
 ```
+
+默认加文档标题：首页居中，宋体二号加粗，副标题用楷体小三写版本名，下面接自动目录。这是复习资料与 word-format 规范的不同之处（规范默认不加全文大标题）；用户明确不要标题时去掉 `--title`。
 
 图片路径相对于第一个 Markdown 文件所在目录（或用 `--resource-path` 指定）。构建链路：预处理（图表自动编号、`==重点==`、删例题块）→ pandoc（LaTeX 公式转成可编辑的 Word 公式）→ python-docx 后处理（套用 word-format 排版规范、表格、页码、预填目录）。
 
@@ -93,6 +105,7 @@ python3 scripts/check_docx.py out.docx --source ch1.md … [--drop-examples]
 
 - `scripts/render_pages.py`：渲染页面、拼图、文字层。
 - `scripts/crop_figure.py`：按比例框批量裁剪配图并生成审查图。
+- `scripts/compose_figures.py`：把几张小图拼成一张带标签的对比图。
 - `scripts/build_docx.py`：Markdown → 排版好的 docx，`--drop-examples` 生成纯方法版。
 - `scripts/check_docx.py`：不依赖渲染器的结构检查。
 - `references/output-template.md`：章节结构、方法卡、例题块模板。

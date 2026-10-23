@@ -19,7 +19,7 @@ centered native tables with 0 spacing in cells, centered page numbers.
   ::: example ... :::      worked example; dropped by --drop-examples
 
 Usage: build_docx.py ch1.md [ch2.md ...] -o out.docx [--toc] [--drop-examples]
-                     [--resource-path DIR]
+                     [--title T] [--subtitle S] [--resource-path DIR]
 """
 import argparse
 import re
@@ -167,13 +167,14 @@ def make_reference(path: Path):
                     keep_next=True)
     st["Heading 1"].paragraph_format.page_break_before = True   # each chapter starts a page
 
-    for name in ("Title", "Subtitle", "TOC Heading"):
-        try:
-            s = st[name]
-        except KeyError:
-            continue
-        set_fonts(s, SONG, size=15, bold=True, color=RGBColor(0, 0, 0))
-        para_format(s, indent=False, align=WD_ALIGN_PARAGRAPH.CENTER, before=6, after=6)
+    # 文档标题 宋体二号加粗；副标题 楷体小三；目录标题同一级标题字号
+    for name, east, size, bold, before, after in (("Title", SONG, 22, True, 24, 6),
+                                                  ("Subtitle", KAI, 15, False, 0, 18),
+                                                  ("TOC Heading", SONG, 15, True, 12, 6)):
+        s = get_style(doc, name)
+        set_fonts(s, east, size=size, bold=bold, color=RGBColor(0, 0, 0))
+        s.font.italic = False
+        para_format(s, indent=False, align=WD_ALIGN_PARAGRAPH.CENTER, before=before, after=after)
 
     for name in ("Image Caption", "Table Caption", "Caption"):
         s = get_style(doc, name)
@@ -358,6 +359,8 @@ def main():
     ap.add_argument("-o", "--output", required=True)
     ap.add_argument("--toc", action="store_true", help="insert an automatic Word TOC (levels 1-3)")
     ap.add_argument("--drop-examples", action="store_true", help="method-only edition")
+    ap.add_argument("--title", help="document title, centred on the first page")
+    ap.add_argument("--subtitle", help="line under the title, e.g. the edition name")
     ap.add_argument("--resource-path", default=None, help="folder that figure paths are relative to")
     args = ap.parse_args()
 
@@ -375,6 +378,10 @@ def main():
         pre.write_text(preprocess(md), encoding="utf-8")
         cmd = ["pandoc", str(pre), "-f", "markdown+tex_math_dollars+bracketed_spans+fenced_divs",
                "-o", str(out), "--reference-doc", str(ref), "--resource-path", str(res)]
+        if args.title:
+            cmd += ["-M", f"title={args.title}"]
+        if args.subtitle:
+            cmd += ["-M", f"subtitle={args.subtitle}"]
         if args.toc:
             cmd += ["--toc", "--toc-depth=3", "-M", "toc-title=目录"]
         subprocess.run(cmd, check=True)

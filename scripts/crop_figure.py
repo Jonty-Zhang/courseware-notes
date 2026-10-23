@@ -8,7 +8,7 @@ rendered page or contact sheet. Lines starting with # are ignored.
 
     crop_figure.py deck.pdf crops.txt --out figs/ [--dpi 220] [--pad 0.01]
 
-Each crop is written to <out>/<name>.png, and a review sheet of all crops
+Each crop is written to <out>/<name>.jpg (or .png with --format png), and a review sheet of all crops
 (<out>/_review.png) is written so the boxes can be checked in one look.
 """
 import argparse
@@ -34,6 +34,9 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--dpi", type=int, default=220)
     ap.add_argument("--pad", type=float, default=0.01)
+    ap.add_argument("--format", choices=["jpg", "png"], default="jpg",
+                    help="jpg keeps the docx small: slide backgrounds are often textured")
+    ap.add_argument("--max-width", type=int, default=1600)
     args = ap.parse_args()
 
     out = Path(args.out)
@@ -56,7 +59,13 @@ def main():
             bx = (max(0, int((x0 - p) * w)), max(0, int((y0 - p) * h)),
                   min(w, int((x1 + p) * w)), min(h, int((y1 + p) * h)))
             crop = img.crop(bx).convert("RGB")
-            crop.save(out / f"{name}.png")
+            if crop.width > args.max_width:
+                crop = crop.resize((args.max_width, int(crop.height * args.max_width / crop.width)),
+                                   Image.LANCZOS)
+            if args.format == "jpg":
+                crop.save(out / f"{name}.jpg", quality=88, optimize=True)
+            else:
+                crop.save(out / f"{name}.png")
             crops.append((name, crop))
 
     if crops:

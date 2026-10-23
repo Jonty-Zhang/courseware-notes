@@ -11,6 +11,7 @@
 
 - **看页面图，不只读文字层。** PPT 导出 PDF 的文字层里，Σ、矢量、上下标常变成乱码，受力图、电路图都是图片。脚本把每页渲染成图并拼成 4 页一张的拼图，逐页阅读。
 - **逐页清单保证覆盖。** 先写 `inventory.md`（知识点 K / 方法 M / 例题 E，每条带页码，跳过页也登记），再写正文，每条结论都能回查课件页码。
+- **多用图。** 概念示意、受力图、分类对比直接截课件配图放在知识点旁边（两个版本都有），几张小图可以拼成带标签的对比图；例题图只放在含例题版。
 - **核对课件里的计算。** 例题数字用 Python 重算，课件算错时按正确值写并加注说明。
 - **可编辑公式与规范排版。** pandoc 把 LaTeX 转成 Word 公式，再用 python-docx 套中文学术排版（A4、2.5 cm 页边距、宋体五号、1.5 倍行距、宋体小三/黑体小四标题、楷体图表题、原生表格、页码、自动目录）。
 - **不依赖 Office 的结构检查。** `check_docx.py` 检查页面、字体字号、表格段距、公式数是否与源稿一致、图题、重点占比和过程性文字。
@@ -32,7 +33,7 @@ pip install -r ~/.claude/skills/courseware-notes/requirements.txt
 ```bash
 python3 scripts/render_pages.py lecture.pdf --out work/ch1
 python3 scripts/crop_figure.py lecture.pdf crops.txt --out work/figs
-python3 scripts/build_docx.py ch1.md ch2.md -o notes.docx --toc
+python3 scripts/build_docx.py ch1.md ch2.md -o notes.docx --toc --title "课程名 知识点与解题方法" --subtitle "（含例题版）"
 python3 scripts/build_docx.py ch1.md ch2.md -o notes_methods.docx --toc --drop-examples
 python3 scripts/check_docx.py notes.docx --source ch1.md ch2.md
 ```
